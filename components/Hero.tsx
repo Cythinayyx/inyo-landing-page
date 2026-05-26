@@ -9,7 +9,7 @@ const continuationCards = [
     eyebrow: "01",
     title: "出发之前",
     subtitle: "今天想慢一点。",
-    image: "/images/expression-flow-01.png",
+    image: "/images/safari/expression-flow-01.jpg",
     tone: "from-[#dbe7f2]/88 via-white/70 to-[#cfd8ee]/72",
   },
   {
@@ -18,7 +18,7 @@ const continuationCards = [
     eyebrow: "02",
     title: "城市正在后退",
     subtitle: "窗外开始变成电影。",
-    image: "/images/expression-flow-02.png",
+    image: "/images/safari/expression-flow-02.jpg",
     tone: "from-[#eceff5]/86 via-[#f8fbff]/72 to-[#d9e7ee]/78",
   },
   {
@@ -27,7 +27,7 @@ const continuationCards = [
     eyebrow: "03",
     title: "电影开始之前",
     subtitle: "夜晚刚刚升温。",
-    image: "/images/expression-flow-03.png",
+    image: "/images/safari/expression-flow-03.jpg",
     tone: "from-[#dfe9ee]/86 via-[#f7fbff]/78 to-[#cdd6e8]/72",
   },
   {
@@ -36,7 +36,7 @@ const continuationCards = [
     eyebrow: "04",
     title: "夜晚有了味道",
     subtitle: "灯光、酒杯和放松下来的自己。",
-    image: "/images/expression-flow-04.png",
+    image: "/images/safari/expression-flow-04.jpg",
     tone: "from-[#e7edf7]/88 via-white/74 to-[#d6e7ee]/74",
   },
   {
@@ -45,7 +45,7 @@ const continuationCards = [
     eyebrow: "05",
     title: "清晨重启",
     subtitle: "昨晚的情绪还没散去。",
-    image: "/images/expression-flow-05.png",
+    image: "/images/safari/expression-flow-05.jpg",
     tone: "from-[#eef3f8]/88 via-white/78 to-[#dce4f0]/72",
   },
   {
@@ -54,7 +54,7 @@ const continuationCards = [
     eyebrow: "06",
     title: "下一段故事",
     subtitle: "有些生活，会自然继续。",
-    image: "/images/expression-flow-06.png",
+    image: "/images/safari/expression-flow-06.jpg",
     tone: "from-[#edf4f7]/88 via-white/76 to-[#dbe8ef]/72",
   },
 ];
@@ -82,9 +82,16 @@ function ExpressionFragment({
     >
       <div className="absolute inset-0 overflow-hidden rounded-[28px]">
         <img
-          alt=""
+          alt={`${card.title}：${card.subtitle}`}
           className="h-full w-full object-cover opacity-95"
+          decoding="async"
+          height={240}
+          loading="eager"
+          onError={(event) => {
+            event.currentTarget.style.opacity = "0";
+          }}
           src={card.image}
+          width={320}
         />
         <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(248,251,255,0.02)_0%,rgba(248,251,255,0.12)_44%,rgba(248,251,255,0.58)_100%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(255,255,255,0.22),transparent_38%)]" />
@@ -129,9 +136,17 @@ function MainExpressionCard() {
         transition={{ duration: 11, ease: "easeInOut", repeat: Infinity }}
       >
         <img
-          alt=""
+          alt="餐厅晚餐正在成为连续故事"
           className="h-full w-full object-cover"
-          src="/images/expression-main.png"
+          decoding="async"
+          fetchPriority="high"
+          height={1000}
+          loading="eager"
+          onError={(event) => {
+            event.currentTarget.style.opacity = "0";
+          }}
+          src="/images/safari/expression-main.jpg"
+          width={772}
         />
       </motion.div>
 

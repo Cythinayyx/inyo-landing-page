@@ -1,3 +1,5 @@
+"use client";
+
 const moments = [
   {
     moment: "那晚回家的路，其实很有电影感。",
@@ -17,6 +19,10 @@ const moments = [
 ];
 
 function ResultFrame({ type }: { type: string }) {
+  const hideBrokenImage = (event: React.SyntheticEvent<HTMLImageElement>) => {
+    event.currentTarget.style.opacity = "0";
+  };
+
   return (
     <div className="relative h-44 overflow-hidden rounded-[26px] border border-white/70 bg-white/48 shadow-[0_18px_64px_rgba(86,106,128,0.08)] backdrop-blur-xl transition duration-500 hover:scale-[1.01]">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(220,235,245,0.46),transparent_30%),linear-gradient(145deg,rgba(255,255,255,0.86),rgba(232,239,246,0.62))]" />
@@ -24,16 +30,26 @@ function ResultFrame({ type }: { type: string }) {
       {type === "drive" ? (
         <>
           <img
-            alt=""
+            alt="夕阳下开车回家的电影感瞬间"
             className="absolute inset-0 h-full w-full object-cover"
-            src="/images/pain-drive-cinematic.png"
+            decoding="async"
+            height={1024}
+            loading="lazy"
+            onError={hideBrokenImage}
+            src="/images/safari/pain-drive-cinematic.jpg"
+            width={1536}
           />
           <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.02),rgba(20,28,42,0.22))]" />
           <div className="absolute bottom-5 right-5 h-20 w-28 overflow-hidden rounded-[20px] border border-white/70 bg-white/42 shadow-[0_14px_42px_rgba(29,38,52,0.24)]">
             <img
-              alt=""
+              alt="普通随手拍的驾驶记录"
               className="h-full w-full object-cover opacity-80 saturate-[0.82]"
-              src="/images/pain-drive-record.png"
+              decoding="async"
+              height={1024}
+              loading="lazy"
+              onError={hideBrokenImage}
+              src="/images/safari/pain-drive-record.jpg"
+              width={1536}
             />
             <div className="absolute inset-0 bg-white/14" />
           </div>
@@ -53,9 +69,14 @@ function ResultFrame({ type }: { type: string }) {
 
       {type === "party" ? (
         <img
-          alt=""
+          alt="朋友聚会的轻线条记忆"
           className="absolute inset-0 h-full w-full object-cover"
-          src="/images/pain-party-line.png"
+          decoding="async"
+          height={1024}
+          loading="lazy"
+          onError={hideBrokenImage}
+          src="/images/safari/pain-party-line.jpg"
+          width={1536}
         />
       ) : null}
 
@@ -63,23 +84,38 @@ function ResultFrame({ type }: { type: string }) {
         <>
           <div className="absolute left-6 top-7 h-20 w-24 rotate-[-3deg] overflow-hidden rounded-[22px] bg-white/42 opacity-90">
             <img
-              alt=""
+              alt="旅行随手拍片段 1"
               className="h-full w-full object-cover saturate-[0.88]"
-              src="/images/pain-travel-01.png"
+              decoding="async"
+              height={1086}
+              loading="lazy"
+              onError={hideBrokenImage}
+              src="/images/safari/pain-travel-01.jpg"
+              width={1448}
             />
           </div>
           <div className="absolute left-28 top-13 h-16 w-24 rotate-[4deg] overflow-hidden rounded-[20px] border border-white/58 bg-white/42">
             <img
-              alt=""
+              alt="旅行随手拍片段 2"
               className="h-full w-full object-cover saturate-[0.88]"
-              src="/images/pain-travel-02.png"
+              decoding="async"
+              height={1086}
+              loading="lazy"
+              onError={hideBrokenImage}
+              src="/images/safari/pain-travel-02.jpg"
+              width={1448}
             />
           </div>
           <div className="absolute right-7 bottom-8 h-20 w-24 rotate-[2deg] overflow-hidden rounded-[22px] bg-white/42 opacity-90">
             <img
-              alt=""
+              alt="旅行随手拍片段 3"
               className="h-full w-full object-cover saturate-[0.88]"
-              src="/images/pain-travel-03.png"
+              decoding="async"
+              height={1086}
+              loading="lazy"
+              onError={hideBrokenImage}
+              src="/images/safari/pain-travel-03.jpg"
+              width={1448}
             />
           </div>
           <div className="absolute left-7 bottom-7 h-2 w-28 rounded-full bg-[#b8c4d1]/26" />
