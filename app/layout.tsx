@@ -4,6 +4,10 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "映你 inyo",
   description: "AI-powered cinematic self-expression platform",
+  icons: {
+    icon: "/favicon.png",
+    apple: "/apple-touch-icon.png",
+  },
 };
 
 export default function RootLayout({

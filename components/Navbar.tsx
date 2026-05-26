@@ -7,7 +7,7 @@ export function Navbar() {
             <img
               alt="映你 inyo"
               className="h-full w-full object-contain"
-              src="/images/inyo-nav-logo.png"
+              src="/images/inyo-logo-new.png"
             />
           </span>
           <span className="text-lg font-semibold tracking-normal">映你 inyo</span>
