@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 const cases = [
   {
@@ -42,11 +42,47 @@ export function CasesSection() {
     2: 0,
   });
   const [activeCase, setActiveCase] = useState(0);
+  const [autoplayBlocked, setAutoplayBlocked] = useState(false);
+  const [playbackUnlocked, setPlaybackUnlocked] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [isInView, setIsInView] = useState(false);
   const [canLoadVideos, setCanLoadVideos] = useState(false);
   const sectionRef = useRef<HTMLElement | null>(null);
   const videoRefs = useRef<Record<number, Array<HTMLVideoElement | null>>>({});
+
+  const prepareVideoForInlinePlayback = useCallback((video: HTMLVideoElement) => {
+    video.muted = true;
+    video.defaultMuted = true;
+    video.playsInline = true;
+    video.preload = "metadata";
+    video.setAttribute("muted", "");
+    video.setAttribute("playsinline", "");
+    video.setAttribute("webkit-playsinline", "");
+    video.setAttribute("preload", "metadata");
+  }, []);
+
+  const tryPlayVideo = useCallback(
+    (video: HTMLVideoElement) => {
+      prepareVideoForInlinePlayback(video);
+
+      const playPromise = video.play();
+
+      if (!playPromise) {
+        return;
+      }
+
+      playPromise
+        .then(() => {
+          setAutoplayBlocked(false);
+        })
+        .catch((error: { name?: string }) => {
+          if (error?.name === "NotAllowedError") {
+            setAutoplayBlocked(true);
+          }
+        });
+    },
+    [prepareVideoForInlinePlayback],
+  );
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(max-width: 767px)");
@@ -103,14 +139,14 @@ export function CasesSection() {
           canLoadVideos &&
           isInView &&
           activeCase === caseIndex &&
-          activeIndex === index &&
-          video.readyState > 0;
+          activeIndex === index;
 
         if (shouldPlay) {
-          video.play().catch(() => undefined);
+          tryPlayVideo(video);
           return;
         }
 
+        prepareVideoForInlinePlayback(video);
         video.pause();
 
         if (!shouldPlay && video.readyState > 0) {
@@ -122,7 +158,30 @@ export function CasesSection() {
         }
       });
     });
-  }, [activeCase, activeVideoByCase, canLoadVideos, isInView, isMobile]);
+  }, [
+    activeCase,
+    activeVideoByCase,
+    canLoadVideos,
+    isInView,
+    isMobile,
+    prepareVideoForInlinePlayback,
+    tryPlayVideo,
+  ]);
+
+  const handleManualPlayback = () => {
+    setPlaybackUnlocked(true);
+    setAutoplayBlocked(false);
+    setActiveCase(0);
+    setActiveVideoByCase({ 0: 0, 1: 0, 2: 0 });
+
+    window.requestAnimationFrame(() => {
+      const firstVideo = videoRefs.current[0]?.[0];
+
+      if (firstVideo) {
+        tryPlayVideo(firstVideo);
+      }
+    });
+  };
 
   return (
     <section ref={sectionRef} id="cases" className="bg-[#101927] px-6 py-24 text-white">
@@ -147,7 +206,12 @@ export function CasesSection() {
                   const activeIndex = activeVideoByCase[caseIndex] ?? 0;
                   const isCurrentVideo = activeIndex === index;
                   const canPlayThisCase = activeCase === caseIndex;
-                  const shouldPlayVideo = canLoadVideos && isInView && isCurrentVideo && canPlayThisCase;
+                  const shouldPlayVideo =
+                    canLoadVideos &&
+                    isInView &&
+                    isCurrentVideo &&
+                    canPlayThisCase &&
+                    (!autoplayBlocked || playbackUnlocked);
 
                   return item.videos ? (
                     <div
@@ -178,9 +242,23 @@ export function CasesSection() {
                         }}
                         onLoadedMetadata={(event) => {
                           const video = event.currentTarget;
+                          prepareVideoForInlinePlayback(video);
 
                           if (!shouldPlayVideo && video.currentTime < 0.01) {
                             video.currentTime = Math.min(0.01, video.duration || 0.01);
+                          }
+
+                          if (shouldPlayVideo) {
+                            tryPlayVideo(video);
+                          }
+                        }}
+                        onLoadedData={(event) => {
+                          const video = event.currentTarget;
+
+                          prepareVideoForInlinePlayback(video);
+
+                          if (shouldPlayVideo) {
+                            tryPlayVideo(video);
                           }
                         }}
                         playsInline
@@ -190,6 +268,7 @@ export function CasesSection() {
                           videoRefs.current[caseIndex][index] = video;
                         }}
                         src={item.videos[index]}
+                        {...{ "webkit-playsinline": "true" }}
                       />
                       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.02),transparent_48%,rgba(9,15,25,0.24))]" />
                     </div>
@@ -211,6 +290,17 @@ export function CasesSection() {
             </article>
           ))}
         </div>
+        {autoplayBlocked && isInView ? (
+          <div className="mt-8 flex justify-center">
+            <button
+              className="rounded-full border border-white/14 bg-white/10 px-5 py-2.5 text-sm font-medium text-white/86 backdrop-blur transition hover:bg-white/16"
+              onClick={handleManualPlayback}
+              type="button"
+            >
+              点击播放
+            </button>
+          </div>
+        ) : null}
       </div>
     </section>
   );
