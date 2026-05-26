@@ -2,37 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 
-function createPoster(title: string, index: number) {
-  const colors = [
-    ["#33445f", "#172233", "#0e1724"],
-    ["#43566f", "#1b2b3f", "#101927"],
-    ["#56677a", "#24344d", "#111a29"],
-    ["#2f4058", "#1d2a3c", "#0d1623"],
-  ][index % 4];
-
-  const svg = `
-    <svg xmlns="http://www.w3.org/2000/svg" width="640" height="800" viewBox="0 0 640 800">
-      <defs>
-        <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
-          <stop offset="0" stop-color="${colors[0]}"/>
-          <stop offset="0.54" stop-color="${colors[1]}"/>
-          <stop offset="1" stop-color="${colors[2]}"/>
-        </linearGradient>
-        <radialGradient id="glow" cx="42%" cy="22%" r="58%">
-          <stop offset="0" stop-color="#e8f7ff" stop-opacity="0.22"/>
-          <stop offset="1" stop-color="#e8f7ff" stop-opacity="0"/>
-        </radialGradient>
-      </defs>
-      <rect width="640" height="800" fill="url(#bg)"/>
-      <rect width="640" height="800" fill="url(#glow)"/>
-      <rect x="54" y="58" width="532" height="684" rx="44" fill="#ffffff" opacity="0.035"/>
-      <text x="56" y="704" fill="#dbe7f3" fill-opacity="0.58" font-family="Arial, sans-serif" font-size="26">${title}</text>
-    </svg>
-  `;
-
-  return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
-}
-
 const cases = [
   {
     title: "巴黎旅行",
@@ -72,11 +41,10 @@ export function CasesSection() {
     1: 0,
     2: 0,
   });
-  const [loadedVideoKeys, setLoadedVideoKeys] = useState<Set<string>>(() => new Set());
+  const [activeCase, setActiveCase] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
   const [isInView, setIsInView] = useState(false);
   const [canLoadVideos, setCanLoadVideos] = useState(false);
-  const [mobileActiveCase, setMobileActiveCase] = useState(0);
   const sectionRef = useRef<HTMLElement | null>(null);
   const videoRefs = useRef<Record<number, Array<HTMLVideoElement | null>>>({});
 
@@ -123,26 +91,6 @@ export function CasesSection() {
   }, [isInView, isMobile]);
 
   useEffect(() => {
-    if (!canLoadVideos) {
-      return;
-    }
-
-    setLoadedVideoKeys((current) => {
-      const next = new Set(current);
-
-      cases.forEach((_, caseIndex) => {
-        if (isMobile && mobileActiveCase !== caseIndex) {
-          return;
-        }
-
-        next.add(`${caseIndex}:${activeVideoByCase[caseIndex] ?? 0}`);
-      });
-
-      return next.size === current.size ? current : next;
-    });
-  }, [activeVideoByCase, canLoadVideos, isMobile, mobileActiveCase]);
-
-  useEffect(() => {
     cases.forEach((_, caseIndex) => {
       const activeIndex = activeVideoByCase[caseIndex] ?? 0;
 
@@ -153,8 +101,10 @@ export function CasesSection() {
 
         const shouldPlay =
           canLoadVideos &&
+          isInView &&
+          activeCase === caseIndex &&
           activeIndex === index &&
-          (!isMobile || mobileActiveCase === caseIndex);
+          video.readyState > 0;
 
         if (shouldPlay) {
           video.play().catch(() => undefined);
@@ -163,16 +113,16 @@ export function CasesSection() {
 
         video.pause();
 
-        if (activeIndex !== index && video.readyState > 0) {
+        if (!shouldPlay && video.readyState > 0) {
           try {
-            video.currentTime = 0;
+            video.currentTime = Math.min(0.01, video.duration || 0.01);
           } catch {
             // Safari can reject currentTime changes before metadata is ready.
           }
         }
       });
     });
-  }, [activeVideoByCase, canLoadVideos, isMobile, loadedVideoKeys, mobileActiveCase]);
+  }, [activeCase, activeVideoByCase, canLoadVideos, isInView, isMobile]);
 
   return (
     <section ref={sectionRef} id="cases" className="bg-[#101927] px-6 py-24 text-white">
@@ -196,11 +146,8 @@ export function CasesSection() {
                 {Array.from({ length: 4 }).map((_, index) => {
                   const activeIndex = activeVideoByCase[caseIndex] ?? 0;
                   const isCurrentVideo = activeIndex === index;
-                  const canPlayThisCase = !isMobile || mobileActiveCase === caseIndex;
-                  const shouldLoadVideo = canLoadVideos && isCurrentVideo && canPlayThisCase;
-                  const videoKey = `${caseIndex}:${index}`;
-                  const shouldRenderVideo = shouldLoadVideo || loadedVideoKeys.has(videoKey);
-                  const poster = createPoster(item.title, index);
+                  const canPlayThisCase = activeCase === caseIndex;
+                  const shouldPlayVideo = canLoadVideos && isInView && isCurrentVideo && canPlayThisCase;
 
                   return item.videos ? (
                     <div
@@ -211,41 +158,39 @@ export function CasesSection() {
                           : "opacity-62 hover:opacity-82"
                       }`}
                     >
-                      <img
-                        alt=""
-                        className="absolute inset-0 h-full w-full object-cover"
-                        loading="lazy"
-                        src={poster}
+                      <video
+                        autoPlay={shouldPlayVideo}
+                        className="relative z-10 h-full w-full object-cover transition duration-700"
+                        muted
+                        onEnded={() => {
+                          setActiveVideoByCase((current) => {
+                            const nextIndex = ((current[caseIndex] ?? 0) + 1) % 4;
+
+                            if (nextIndex === 0) {
+                              setActiveCase((currentCase) => (currentCase + 1) % cases.length);
+                            }
+
+                            return {
+                              ...current,
+                              [caseIndex]: nextIndex,
+                            };
+                          });
+                        }}
+                        onLoadedMetadata={(event) => {
+                          const video = event.currentTarget;
+
+                          if (!shouldPlayVideo && video.currentTime < 0.01) {
+                            video.currentTime = Math.min(0.01, video.duration || 0.01);
+                          }
+                        }}
+                        playsInline
+                        preload="metadata"
+                        ref={(video) => {
+                          videoRefs.current[caseIndex] ??= [];
+                          videoRefs.current[caseIndex][index] = video;
+                        }}
+                        src={item.videos[index]}
                       />
-                      {shouldRenderVideo ? (
-                        <video
-                          autoPlay={shouldLoadVideo}
-                          className="relative z-10 h-full w-full object-cover transition duration-700"
-                          muted
-                          onEnded={() => {
-                            setActiveVideoByCase((current) => {
-                              const nextIndex = ((current[caseIndex] ?? 0) + 1) % 4;
-
-                              if (isMobile && nextIndex === 0) {
-                                setMobileActiveCase((currentCase) => (currentCase + 1) % cases.length);
-                              }
-
-                              return {
-                                ...current,
-                                [caseIndex]: nextIndex,
-                              };
-                            });
-                          }}
-                          playsInline
-                          poster={poster}
-                          preload="metadata"
-                          ref={(video) => {
-                            videoRefs.current[caseIndex] ??= [];
-                            videoRefs.current[caseIndex][index] = video;
-                          }}
-                          src={item.videos[index]}
-                        />
-                      ) : null}
                       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.02),transparent_48%,rgba(9,15,25,0.24))]" />
                     </div>
                   ) : (
