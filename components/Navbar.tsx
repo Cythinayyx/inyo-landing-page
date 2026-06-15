@@ -10,14 +10,7 @@ export function Navbar() {
               src="/images/inyo-logo-new.png"
             />
           </span>
-          <span className="text-lg font-semibold tracking-normal">映你 inyo</span>
-        </a>
-
-        <a
-          href="#start"
-          className="rounded-full bg-[#152033] px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-[#24344f]"
-        >
-          立即体验
+          <span className="text-lg font-semibold tracking-normal">映你</span>
         </a>
       </nav>
     </header>
