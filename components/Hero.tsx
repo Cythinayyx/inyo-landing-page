@@ -1,7 +1,9 @@
 "use client";
 
-import { DownloadButtons } from "@/components/DownloadButtons";
 import { motion } from "framer-motion";
+
+const qrCodeSrc =
+  "https://api.qrserver.com/v1/create-qr-code/?size=512x512&format=png&data=https%3A%2F%2Finyo-landing-page-xzfr.vercel.app%2Fcoming-soon";
 
 const continuationCards = [
   {
@@ -183,8 +185,35 @@ export function Hero() {
           <p className="mt-5 max-w-[500px] text-lg font-light leading-8 text-[#74839a] sm:text-xl">
             AI帮你持续呈现更好的自己
           </p>
-          <div className="mt-11">
-            <DownloadButtons />
+          <div className="mt-11 flex flex-wrap items-center gap-4">
+            {[
+              { label: "iOS 下载", caption: "扫码获取 iOS 版本", primary: true },
+              { label: "Android 下载", caption: "扫码获取 Android 版本", primary: false },
+            ].map((item) => (
+              <div className="group relative" key={item.label}>
+                <a
+                  href="/coming-soon"
+                  className={
+                    item.primary
+                      ? "inline-flex rounded-full bg-[#152033] px-7 py-3.5 text-base font-medium text-white transition hover:bg-[#263754]"
+                      : "inline-flex rounded-full border border-[#cdd9e5] bg-white/78 px-7 py-3.5 text-base font-medium text-[#152033] transition hover:border-[#b8c8d9] hover:bg-white"
+                  }
+                >
+                  {item.label}
+                </a>
+
+                <div className="pointer-events-none absolute left-0 top-full z-30 mt-4 hidden w-[220px] rounded-[28px] border border-[#dce7f1] bg-white/95 p-4 text-center shadow-[0_20px_60px_rgba(63,84,110,0.18)] backdrop-blur-xl group-hover:block group-focus-within:block">
+                  <img
+                    alt={`${item.label} 下载二维码`}
+                    className="h-[172px] w-[172px] rounded-[20px] border border-[#e4edf5] object-cover"
+                    src={qrCodeSrc}
+                  />
+                  <p className="mt-3 text-sm font-medium text-[#1c2a40]">
+                    {item.caption}
+                  </p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
