@@ -1,3 +1,5 @@
+import { DownloadButtons } from "@/components/DownloadButtons";
+
 export function BrandClose() {
   return (
     <section id="start" className="px-6 py-24">
@@ -8,12 +10,9 @@ export function BrandClose() {
         <p className="mx-auto mt-7 max-w-2xl text-xl leading-9 text-[#60748d]">
           从一个想法开始，持续创作属于你的人生片段。
         </p>
-        <a
-          href="#"
-          className="mt-10 inline-flex rounded-full bg-[#152033] px-8 py-4 text-base font-medium text-white transition hover:bg-[#263754]"
-        >
-          立即下载
-        </a>
+        <div className="mt-10">
+          <DownloadButtons align="center" />
+        </div>
       </div>
     </section>
   );
