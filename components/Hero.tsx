@@ -1,5 +1,6 @@
 "use client";
 
+import { DownloadButtons } from "@/components/DownloadButtons";
 import { motion } from "framer-motion";
 
 const continuationCards = [
@@ -182,13 +183,8 @@ export function Hero() {
           <p className="mt-5 max-w-[500px] text-lg font-light leading-8 text-[#74839a] sm:text-xl">
             AI帮你持续呈现更好的自己
           </p>
-          <div className="mt-11 flex flex-wrap items-center gap-4">
-            <a
-              href="#start"
-              className="rounded-full bg-[#152033] px-7 py-3.5 text-base font-medium text-white transition hover:bg-[#263754]"
-            >
-              立即下载
-            </a>
+          <div className="mt-11">
+            <DownloadButtons />
           </div>
         </div>
 
